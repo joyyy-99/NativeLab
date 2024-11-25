@@ -1,50 +1,124 @@
-# Welcome to your Expo app 👋
+# NativeLab - Duolingo Clone
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native implementation of a Duolingo-like language learning application using Expo Router and Firebase.
 
-## Get started
+## Project Structure
 
-1. Install dependencies
+```
+app/
+  ├── _layout.tsx           # Root layout with navigation setup
+  ├── index.tsx            # Initial landing/splash screen
+  ├── auth/                # Authentication flows
+  │   ├── _layout.tsx      # Auth navigation layout
+  │   ├── sign-in.tsx      # Sign in screen
+  │   ├── sign-up.tsx      # Sign up screen
+  │   └── onboarding.tsx   # Language selection & initial setup
+  ├── home/                # Main app screens
+  │   ├── _layout.tsx      # Tab navigation layout
+  │   └── index.tsx        # Home dashboard with lessons
+  ├── lessons/             # Lesson-related screens
+  │   ├── _layout.tsx      # Lessons navigation layout
+  │   ├── [id].tsx         # Individual lesson screen
+  │   └── complete.tsx     # Lesson completion screen
+  ├── practice/            # Practice mode screens
+  │   ├── _layout.tsx      # Practice navigation layout
+  │   └── index.tsx        # Practice selection/dashboard
+  ├── profile/             # User profile screens
+  │   ├── _layout.tsx      # Profile navigation layout
+  │   ├── index.tsx        # Main profile screen
+  │   ├── stats.tsx        # Learning statistics
+  │   └── settings.tsx     # User settings
+  └── leaderboard/         # Leaderboard and social features
+      ├── _layout.tsx      # Leaderboard navigation layout
+      └── index.tsx        # Leaderboard screen
 
+firebase/
+  ├── config/
+  │   └── firebase.config.ts    # Firebase configuration
+  ├── auth/
+  │   ├── types.ts              # Auth-related types
+  │   └── auth.ts               # Auth methods
+  ├── firestore/
+  │   ├── types.ts              # Firestore types
+  │   ├── users.ts              # User-related operations
+  │   ├── lessons.ts            # Lesson-related operations
+  │   ├── progress.ts           # Progress tracking operations
+  │   └── leaderboard.ts        # Leaderboard operations
+  └── storage/
+      └── assets.ts             # Storage operations for lesson assets
+
+components/
+  ├── auth/                     # Auth-related components
+  ├── lessons/                  # Lesson-specific components
+  ├── practice/                # Practice components
+  ├── shared/                   # Shared/common components
+  └── ui/                       # Basic UI components
+
+constants/
+  ├── colors.ts                 # Color definitions
+  ├── typography.ts             # Typography styles
+  ├── layout.ts                 # Layout constants
+  └── config.ts                 # App configuration
+
+hooks/
+  ├── useAuth.ts                # Authentication hooks
+  ├── useLesson.ts              # Lesson-related hooks
+  ├── useProgress.ts            # Progress tracking hooks
+  └── useLeaderboard.ts         # Leaderboard hooks
+
+types/
+  ├── auth.types.ts             # Authentication types
+  ├── lesson.types.ts           # Lesson-related types
+  ├── user.types.ts             # User-related types
+  └── api.types.ts              # API-related types
+
+utils/
+  ├── firebase/                 # Firebase utility functions
+  ├── validation/               # Form validation
+  ├── formatting/               # Data formatting
+  └── analytics/                # Analytics helpers
+```
+
+## Tech Stack
+
+- React Native
+- Expo Router
+- Firebase (Authentication, Firestore, Storage)
+- TypeScript
+
+## Getting Started
+
+1. Install dependencies:
    ```bash
    npm install
    ```
 
-2. Start the app
-
+2. Start the development server:
    ```bash
-    npx expo start
+   npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+## Firebase Setup
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+1. Create a Firebase project
+2. Add your Firebase configuration in `firebase/config/firebase.config.ts`
+3. Enable Authentication, Firestore, and Storage in your Firebase console
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Development
 
-## Get a fresh project
+- The app uses Expo Router for navigation
+- Firebase services are organized by feature in the `firebase` directory
+- Reusable components are stored in the `components` directory
+- Type definitions are in the `types` directory
+- Custom hooks are in the `hooks` directory
+- Constants and utilities are organized in their respective directories
 
-When you're ready, run:
+## Contributing
 
-```bash
-npm run reset-project
-```
+1. Create a new branch for your feature
+2. Make your changes
+3. Submit a pull request
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## License
 
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+MIT
