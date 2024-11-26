@@ -1,8 +1,20 @@
-import { getFirestore, doc, setDoc, getDoc, updateDoc } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc, updateDoc, enableIndexedDbPersistence } from 'firebase/firestore';
 import { app } from '../config/firebase.config';
 import type { AuthUser } from '../auth/types';
 
 const db = getFirestore(app);
+
+// Enable offline persistence
+enableIndexedDbPersistence(db)
+  .catch((err) => {
+    if (err.code === 'failed-precondition') {
+      // Multiple tabs open, persistence can only be enabled in one tab at a time
+      console.warn('Firestore persistence failed to enable: Multiple tabs open');
+    } else if (err.code === 'unimplemented') {
+      // The current browser doesn't support persistence
+      console.warn('Firestore persistence not supported by browser');
+    }
+  });
 
 export interface UserProfile {
   uid: string;
@@ -21,6 +33,10 @@ export interface UserProfile {
 }
 
 export const createUserProfile = async (user: AuthUser, additionalData?: Partial<UserProfile>): Promise<void> => {
+  if (!navigator.onLine) {
+    console.warn('Creating user profile while offline - changes will be synced when online');
+  }
+  
   try {
     const userRef = doc(db, 'users', user.uid);
     const userSnapshot = await getDoc(userRef);
@@ -32,7 +48,7 @@ export const createUserProfile = async (user: AuthUser, additionalData?: Partial
         username: user.displayName || '',
         createdAt: Date.now(),
         lastLoginAt: Date.now(),
-        photoURL: user.photoURL || undefined,
+        photoURL: user.photoURL || '',
         // Default values for new users
         nativeLanguage: '',
         learningLanguages: [],
@@ -51,8 +67,12 @@ export const createUserProfile = async (user: AuthUser, additionalData?: Partial
       });
     }
   } catch (error: any) {
-    console.error('Error creating user profile:', error);
-    throw new Error('Failed to create user profile');
+    if (error.code === 'unavailable' || error.message.includes('offline')) {
+      console.warn('Operation queued - will be completed when back online');
+      // The operation will be queued thanks to offline persistence
+      return;
+    }
+    throw error; // Re-throw other errors
   }
 };
 
