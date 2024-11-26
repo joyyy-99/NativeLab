@@ -9,6 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 
 const { width, height } = Dimensions.get('window');
 
@@ -33,6 +34,27 @@ export default function Index() {
       damping: 15,
       stiffness: 50,
     });
+
+    // Navigate to sign-in page after 3.5 seconds
+    const timer = setTimeout(() => {
+      // Fade out animations
+      textOpacity.value = withTiming(0, {
+        duration: 500,
+        easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+      });
+
+      imageTranslateY.value = withSpring(height, {
+        damping: 15,
+        stiffness: 50,
+      });
+
+      // Navigate after fade out
+      setTimeout(() => {
+        router.replace('/auth/sign-in');
+      }, 500);
+    }, 3500);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const imageAnimatedStyle = useAnimatedStyle(() => ({
