@@ -1,11 +1,20 @@
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, ScrollView, SafeAreaView, Image, Animated } from 'react-native';
-import { Link, router } from 'expo-router';
+import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
+import { useAuth } from '../../hooks/useAuth';
+import type { SignUpCredentials } from '../../firebase/auth/types';
 
 const { width } = Dimensions.get('window');
 
 export default function SignUp() {
+  const { signUp, signInWithGoogle, signInWithApple, loading, error } = useAuth();
+  const [credentials, setCredentials] = useState<SignUpCredentials>({
+    username: '',
+    email: '',
+    password: '',
+  });
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -16,8 +25,13 @@ export default function SignUp() {
     }).start();
   }, []);
 
-  const handleSignIn = () => {
-    router.push('/auth/sign-in');
+  const handleSignUp = async () => {
+    if (!acceptedTerms) {
+      // You might want to show this in a more user-friendly way
+      alert('Please accept the privacy policy to continue');
+      return;
+    }
+    await signUp(credentials);
   };
 
   return (
@@ -37,7 +51,7 @@ export default function SignUp() {
           <View style={styles.authTypeContainer}>
             <TouchableOpacity 
               style={styles.inactiveAuthButton}
-              onPress={handleSignIn}
+              onPress={() => router.push('/auth/sign-in')}
             >
               <Text style={styles.inactiveAuthButtonText}>Log In</Text>
             </TouchableOpacity>
@@ -54,12 +68,16 @@ export default function SignUp() {
                 style={styles.input}
                 placeholder="Enter Your Username"
                 placeholderTextColor="#7E7C7C"
+                value={credentials.username}
+                onChangeText={(text) => setCredentials(prev => ({ ...prev, username: text }))}
               />
               <Text style={styles.label}>Email</Text>
               <TextInput 
                 style={styles.input}
                 placeholder="Enter Your Email"
                 placeholderTextColor="#7E7C7C"
+                value={credentials.email}
+                onChangeText={(text) => setCredentials(prev => ({ ...prev, email: text }))}
                 keyboardType="email-address"
                 autoCapitalize="none"
               />
@@ -68,25 +86,38 @@ export default function SignUp() {
                 style={styles.input}
                 placeholder="Enter Your Password"
                 placeholderTextColor="#7E7C7C"
+                value={credentials.password}
+                onChangeText={(text) => setCredentials(prev => ({ ...prev, password: text }))}
                 secureTextEntry
               />
             </View>
 
             {/* Privacy Policy Checkbox */}
             <View style={styles.policyContainer}>
-              <TouchableOpacity style={styles.checkbox} />
+              <TouchableOpacity 
+                style={[styles.checkbox, acceptedTerms && styles.checkedBox]}
+                onPress={() => setAcceptedTerms(!acceptedTerms)}
+              />
               <Text style={styles.policyText}>
                 I have read and agreed to the privacy policy
               </Text>
             </View>
 
-            <TouchableOpacity style={styles.signUpButton}>
-              <Text style={styles.signUpButtonText}>Sign Up</Text>
+            {error && <Text style={styles.errorText}>{error}</Text>}
+
+            <TouchableOpacity 
+              style={[styles.signUpButton, loading && styles.disabledButton]}
+              onPress={handleSignUp}
+              disabled={loading}
+            >
+              <Text style={styles.signUpButtonText}>
+                {loading ? 'Signing up...' : 'Sign Up'}
+              </Text>
             </TouchableOpacity>
 
             <View style={styles.loginPrompt}>
               <Text style={styles.promptText}>Already have an account? </Text>
-              <TouchableOpacity onPress={handleSignIn}>
+              <TouchableOpacity onPress={() => router.push('/auth/sign-in')}>
                 <Text style={styles.loginLink}>Sign In</Text>
               </TouchableOpacity>
             </View>
@@ -99,17 +130,20 @@ export default function SignUp() {
 
           {/* Social Sign Up Options */}
           <View style={styles.socialContainer}>
-            <TouchableOpacity style={styles.socialButton}>
+            <TouchableOpacity 
+              style={styles.socialButton}
+              onPress={signInWithGoogle}
+              disabled={loading}
+            >
               <Image source={require('../../assets/google.png')} style={styles.socialIcon} />
               <Text style={styles.socialButtonText}>Sign up with Google</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.socialButton}>
-              <Image source={require('../../assets/facebook.png')} style={styles.socialIcon} />
-              <Text style={styles.socialButtonText}>Sign up with Facebook</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.socialButton}>
+            <TouchableOpacity 
+              style={styles.socialButton}
+              onPress={signInWithApple}
+              disabled={loading}
+            >
               <Image source={require('../../assets/apple.png')} style={styles.socialIcon} />
               <Text style={styles.socialButtonText}>Sign up with Apple</Text>
             </TouchableOpacity>
@@ -208,6 +242,9 @@ const styles = StyleSheet.create({
     borderColor: '#000000',
     backgroundColor: '#FFFFFF',
   },
+  checkedBox: {
+    backgroundColor: '#000000',
+  },
   policyText: {
     fontSize: 14,
     color: '#000000',
@@ -219,6 +256,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  disabledButton: {
+    opacity: 0.7,
   },
   signUpButtonText: {
     fontWeight: '700',
@@ -278,5 +318,10 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     marginRight: 10,
+  },
+  errorText: {
+    color: '#FF3B30',
+    fontSize: 14,
+    textAlign: 'center',
   },
 });

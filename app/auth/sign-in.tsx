@@ -1,11 +1,18 @@
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, ScrollView, SafeAreaView, Image, Animated } from 'react-native';
-import { Link, router } from 'expo-router';
+import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
+import { useAuth } from '../../hooks/useAuth';
+import type { SignInCredentials } from '../../firebase/auth/types';
 
 const { width } = Dimensions.get('window');
 
 export default function SignIn() {
+  const { signIn, signInWithGoogle, signInWithApple, loading, error } = useAuth();
+  const [credentials, setCredentials] = useState<SignInCredentials>({
+    email: '',
+    password: '',
+  });
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -16,8 +23,8 @@ export default function SignIn() {
     }).start();
   }, []);
 
-  const handleSignUp = () => {
-    router.push('/auth/sign-up');
+  const handleSignIn = async () => {
+    await signIn(credentials);
   };
 
   return (
@@ -40,7 +47,7 @@ export default function SignIn() {
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.inactiveAuthButton}
-              onPress={handleSignUp}
+              onPress={() => router.push('/auth/sign-up')}
             >
               <Text style={styles.inactiveAuthButtonText}>Sign Up</Text>
             </TouchableOpacity>
@@ -49,28 +56,42 @@ export default function SignIn() {
           {/* Login Form */}
           <View style={styles.formContainer}>
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Username</Text>
+              <Text style={styles.label}>Email</Text>
               <TextInput 
                 style={styles.input}
-                placeholder="Enter Your Username"
+                placeholder="Enter Your Email"
                 placeholderTextColor="#7E7C7C"
+                value={credentials.email}
+                onChangeText={(text) => setCredentials(prev => ({ ...prev, email: text }))}
+                autoCapitalize="none"
+                keyboardType="email-address"
               />
               <Text style={styles.label}>Password</Text>
               <TextInput 
                 style={styles.input}
                 placeholder="Enter Your Password"
                 placeholderTextColor="#7E7C7C"
+                value={credentials.password}
+                onChangeText={(text) => setCredentials(prev => ({ ...prev, password: text }))}
                 secureTextEntry
               />
             </View>
 
-            <TouchableOpacity style={styles.loginButton}>
-              <Text style={styles.loginButtonText}>Log In</Text>
+            {error && <Text style={styles.errorText}>{error}</Text>}
+
+            <TouchableOpacity 
+              style={[styles.loginButton, loading && styles.disabledButton]}
+              onPress={handleSignIn}
+              disabled={loading}
+            >
+              <Text style={styles.loginButtonText}>
+                {loading ? 'Signing in...' : 'Log In'}
+              </Text>
             </TouchableOpacity>
 
             <View style={styles.signupPrompt}>
               <Text style={styles.promptText}>Don't have an account? </Text>
-              <TouchableOpacity onPress={handleSignUp}>
+              <TouchableOpacity onPress={() => router.push('/auth/sign-up')}>
                 <Text style={styles.signupLink}>Sign Up</Text>
               </TouchableOpacity>
             </View>
@@ -83,17 +104,20 @@ export default function SignIn() {
 
           {/* Social Login Options */}
           <View style={styles.socialContainer}>
-            <TouchableOpacity style={styles.socialButton}>
+            <TouchableOpacity 
+              style={styles.socialButton}
+              onPress={signInWithGoogle}
+              disabled={loading}
+            >
               <Image source={require('../../assets/google.png')} style={styles.socialIcon} />
               <Text style={styles.socialButtonText}>Log in with Google</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.socialButton}>
-              <Image source={require('../../assets/facebook.png')} style={styles.socialIcon} />
-              <Text style={styles.socialButtonText}>Log in with Facebook</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.socialButton}>
+            <TouchableOpacity 
+              style={styles.socialButton}
+              onPress={signInWithApple}
+              disabled={loading}
+            >
               <Image source={require('../../assets/apple.png')} style={styles.socialIcon} />
               <Text style={styles.socialButtonText}>Log in with Apple</Text>
             </TouchableOpacity>
@@ -245,5 +269,13 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     marginRight: 10,
+  },
+  errorText: {
+    color: '#FF3B30',
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  disabledButton: {
+    opacity: 0.7,
   },
 });
