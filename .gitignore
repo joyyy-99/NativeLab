@@ -36,5 +36,10 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
-firebase/config/firebase.config.ts
+
+# Firebase config and credentials
+.env
+./firebase/config/firebase.config.ts
 google-services.json
+firebase.config.ts
+firebase.config.json
