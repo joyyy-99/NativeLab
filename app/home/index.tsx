@@ -1,17 +1,24 @@
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Image, Dimensions } from 'react-native';
-import { useEffect, useState } from 'react';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useAuth } from '../../hooks/useAuth';
-import { getUserProfile } from '../../firebase/firestore/users';
-import type { UserProfile } from '../../firebase/firestore/users';
-import { StatusBar } from 'expo-status-bar';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  TouchableOpacity,
+  Image,
+  Dimensions,
+} from "react-native";
+import { useAuth } from "../../hooks/useAuth";
+import { getUserProfile } from "../../firebase/firestore/users";
+import { StatusBar } from "expo-status-bar";
+import { router } from "expo-router";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 export default function Home() {
   const { user, signOut } = useAuth();
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [userProfile, setUserProfile] = useState<{ username: string; photoURL?: string } | null>(null);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -20,9 +27,7 @@ export default function Home() {
           const profile = await getUserProfile(user.uid);
           setUserProfile(profile);
         } catch (error) {
-          console.error('Error fetching user profile:', error);
-        } finally {
-          setLoading(false);
+          console.error("Error fetching user profile:", error);
         }
       }
     };
@@ -30,79 +35,76 @@ export default function Home() {
     fetchUserProfile();
   }, [user]);
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading...</Text>
-      </View>
-    );
-  }
-
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Header Section */}
-        <LinearGradient
-          colors={['#FEF616', '#FCA502']}
-          style={styles.headerContainer}
-        >
-          <View style={styles.profileSection}>
-            <View style={styles.profileInfo}>
-              <Text style={styles.welcomeText}>Welcome back,</Text>
-              <Text style={styles.username}>{userProfile?.username || 'User'}</Text>
-              <View style={styles.statsContainer}>
-                <View style={styles.statItem}>
-                  <Text style={styles.statValue}>{userProfile?.streakCount || 0}</Text>
-                  <Text style={styles.statLabel}>Day Streak</Text>
-                </View>
-                <View style={styles.statItem}>
-                  <Text style={styles.statValue}>{userProfile?.xpPoints || 0}</Text>
-                  <Text style={styles.statLabel}>XP Points</Text>
-                </View>
-                <View style={styles.statItem}>
-                  <Text style={styles.statValue}>{userProfile?.currentLevel || 1}</Text>
-                  <Text style={styles.statLabel}>Level</Text>
-                </View>
-              </View>
-            </View>
+        {/* HEADER */}
+        <View style={styles.headerContainer}>
+          <TouchableOpacity>
+            <Image source={require("../../assets/images/kenya-flag.png")} style={styles.flagIcon} />
+          </TouchableOpacity>
+          <View style={styles.userInfo}>
+            <Text style={styles.greeting}>Hello {userProfile?.username || "User"}</Text>
+            <Text style={styles.subText}>Let's have fun!</Text>
           </View>
-        </LinearGradient>
+          <TouchableOpacity onPress={() => router.push("/profile")}>
+            <Image
+              source={userProfile?.photoURL ? { uri: userProfile.photoURL } : require("../../assets/images/profile-placeholder.png")}
+              style={styles.profileImage}
+            />
+          </TouchableOpacity>
+        </View>
 
-        {/* Learning Section */}
-        <View style={styles.learningSection}>
-          <Text style={styles.sectionTitle}>Continue Learning</Text>
-          <View style={styles.languageCards}>
-            {userProfile?.learningLanguages?.map((language, index) => (
-              <TouchableOpacity 
-                key={index}
-                style={styles.languageCard}
-              >
-                <Text style={styles.languageText}>{language}</Text>
-                <Text style={styles.progressText}>Continue →</Text>
-              </TouchableOpacity>
-            ))}
-            {(!userProfile?.learningLanguages || userProfile.learningLanguages.length === 0) && (
-              <TouchableOpacity style={styles.addLanguageCard}>
-                <Text style={styles.addLanguageText}>Add a language</Text>
-                <Text style={styles.addLanguageIcon}>+</Text>
-              </TouchableOpacity>
-            )}
+        {/* NAVIGATION BUTTONS */}
+        <View style={styles.navButtons}>
+          <TouchableOpacity style={styles.activeButton}>
+            <Text style={styles.activeButtonText}>Learn</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.inactiveButton}>
+            <Text style={styles.inactiveButtonText}>Quiz</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.inactiveButton}>
+            <Text style={styles.inactiveButtonText}>Games</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* LEARNING CATEGORIES */}
+        <View style={styles.categories}>
+          <TouchableOpacity style={styles.category}>
+            <Image source={require("../../assets/images/videos.png")} style={styles.originalImage} />
+            <Text style={styles.categoryText}>Videos</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.category}>
+            <Image source={require("../../assets/images/writing.png")} style={styles.originalImage} />
+            <Text style={styles.categoryText}>Writing</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.category}>
+            <Image source={require("../../assets/images/speaking.png")} style={styles.originalImage} />
+            <Text style={styles.categoryText}>Speaking</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.category}>
+            <Image source={require("../../assets/images/pronunciation.png")} style={styles.originalImage} />
+            <Text style={styles.categoryText}>Pronunciation</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* GOALS SECTION */}
+        <View style={styles.goalContainer}>
+          <View style={styles.goalBox}>
+            <Text style={styles.goalTitle}>DAILY GOAL</Text>
+          </View>
+          <View style={styles.goalBox}>
+            <Text style={styles.goalTitle}>WEEKLY GOAL</Text>
           </View>
         </View>
 
-        {/* Quick Actions */}
-        <View style={styles.quickActions}>
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.actionButtonText}>Daily Challenge</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.actionButtonText}>Practice</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.actionButton, styles.signOutButton]}
-            onPress={signOut}
-          >
+        {/* SIGN OUT BUTTON */}
+        <View style={styles.signOutContainer}>
+          <TouchableOpacity style={styles.signOutButton} onPress={signOut}>
             <Text style={styles.signOutButtonText}>Sign Out</Text>
           </TouchableOpacity>
         </View>
@@ -111,135 +113,119 @@ export default function Home() {
   );
 }
 
+/* STYLES */
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-  },
-  loadingText: {
-    fontSize: 16,
-    color: '#000000',
+    backgroundColor: "#FFFFFF",
+    paddingTop: 40,
   },
   headerContainer: {
-    padding: 20,
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-  },
-  profileSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
     marginTop: 20,
   },
-  profileInfo: {
-    flex: 1,
+  flagIcon: {
+    width: 30,
+    height: 20,
   },
-  welcomeText: {
-    fontSize: 16,
-    color: '#000000',
-    opacity: 0.7,
+  userInfo: {
+    alignItems: "center",
   },
-  username: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#000000',
-    marginTop: 4,
+  greeting: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#000",
   },
-  statsContainer: {
-    flexDirection: 'row',
-    marginTop: 20,
-    justifyContent: 'space-between',
-    maxWidth: 300,
-  },
-  statItem: {
-    alignItems: 'center',
-  },
-  statValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#000000',
-  },
-  statLabel: {
+  subText: {
     fontSize: 14,
-    color: '#000000',
-    opacity: 0.7,
-    marginTop: 4,
+    color: "#7E7C7C",
   },
-  learningSection: {
-    padding: 20,
+  profileImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
   },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#000000',
-    marginBottom: 15,
+  navButtons: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginVertical: 15,
+    marginTop: 20,
   },
-  languageCards: {
-    gap: 15,
+  activeButton: {
+    backgroundColor: "#F9DB82",
+    paddingVertical: 10,
+    paddingHorizontal: 30,
+    borderRadius: 20,
   },
-  languageCard: {
-    backgroundColor: '#F9DB82',
-    padding: 20,
-    borderRadius: 15,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  inactiveButton: {
+    backgroundColor: "#F5F5F5",
+    paddingVertical: 10,
+    paddingHorizontal: 30,
+    borderRadius: 20,
   },
-  languageText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#000000',
-  },
-  progressText: {
+  activeButtonText: {
+    color: "#000",
+    fontWeight: "bold",
     fontSize: 16,
-    color: '#000000',
-    opacity: 0.7,
   },
-  addLanguageCard: {
-    backgroundColor: '#F5F5F5',
-    padding: 20,
-    borderRadius: 15,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  inactiveButtonText: {
+    color: "#7E7C7C",
+    fontSize: 16,
   },
-  addLanguageText: {
-    fontSize: 18,
-    color: '#000000',
-    opacity: 0.7,
+  categories: {
+    alignItems: "center",
+    marginTop: 20,
   },
-  addLanguageIcon: {
-    fontSize: 24,
-    color: '#000000',
-    opacity: 0.7,
+  category: {
+    alignItems: "center",
+    marginVertical: 10,
   },
-  quickActions: {
-    padding: 20,
-    gap: 15,
+  originalImage: {
+    width: 80, 
+    height: 80,
+    resizeMode: "contain", 
   },
-  actionButton: {
-    backgroundColor: '#F9DB82',
-    padding: 15,
+  categoryText: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginTop: 5,
+    color: "#000",
+  },
+  goalContainer: {
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    marginVertical: 20,
+  },
+  goalBox: {
+    width: width * 0.4,
+    height: 50,
+    backgroundColor: "#F5F5F5",
     borderRadius: 10,
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
-  actionButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000000',
+  goalTitle: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#000",
+  },
+  signOutContainer: {
+    alignItems: "center",
+    marginBottom: 30,
   },
   signOutButton: {
-    backgroundColor: '#FF3B30',
-    marginTop: 20,
+    backgroundColor: "#FF3B30",
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    borderRadius: 10,
+    alignItems: "center",
   },
   signOutButtonText: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
-});
+}); 
