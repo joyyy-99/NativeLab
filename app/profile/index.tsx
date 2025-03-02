@@ -8,7 +8,6 @@ import {
   Switch,
   Dimensions,
   Share,
-  ActivityIndicator,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
@@ -20,16 +19,22 @@ import { uploadImageToCloudinary } from "../../firebase/storage/cloudinary";
 const { width } = Dimensions.get("window");
 
 export default function Profile() {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const systemTheme = useColorScheme();
   const [isDarkMode, setIsDarkMode] = useState(systemTheme === "dark");
-  const [isLoading, setIsLoading] = useState(true);
-  const [userProfile, setUserProfile] = useState<{ username: string; photoURL: string } | null>(null);
+  const [userProfile, setUserProfile] = useState<{ username: string; photoURL: string }>({
+    username: "User",
+    photoURL: "",
+  });
+
+  // Effect to update theme when system theme changes
+  useEffect(() => {
+    setIsDarkMode(systemTheme === "dark");
+  }, [systemTheme]);
 
   useEffect(() => {
     const fetchProfile = async () => {
       if (user?.uid) {
-        setIsLoading(true);
         try {
           const profileData = await getUserProfile(user.uid);
           setUserProfile({
@@ -38,8 +43,6 @@ export default function Profile() {
           });
         } catch (error) {
           console.error("Error fetching user profile:", error);
-        } finally {
-          setIsLoading(false);
         }
       }
     };
@@ -67,20 +70,17 @@ export default function Profile() {
 
     if (!imageResult.canceled) {
       try {
-        setIsLoading(true);
         const uploadedUrl = await uploadImageToCloudinary(imageResult.assets[0].uri);
         if (uploadedUrl && user?.uid) {  
           await updateUserProfile(user.uid, { photoURL: uploadedUrl });
-          setUserProfile((prev) => prev ? {
+          setUserProfile((prev) => ({
             ...prev,
             photoURL: uploadedUrl,
-          } : null);
+          }));
         }
       } catch (error) {
         console.error("Error uploading image:", error);
         alert("Failed to upload image. Please try again.");
-      } finally {
-        setIsLoading(false);
       }
     }
   };
@@ -107,20 +107,6 @@ export default function Profile() {
       alert('Error sharing. Please try again.');
     }
   };
-
-  // Show loading indicator while data is being fetched
-  if (isLoading) {
-    return (
-      <View style={[styles.container, isDarkMode && styles.darkContainer, styles.loadingContainer]}>
-        <ActivityIndicator size="large" color={isDarkMode ? "#FFFFFF" : "#000000"} />
-      </View>
-    );
-  }
-
-  // Don't render anything if profile data isn't available yet
-  if (!userProfile) {
-    return null;
-  }
 
   return (
     <View style={[styles.container, isDarkMode && styles.darkContainer]}>
@@ -201,6 +187,13 @@ export default function Profile() {
       <TouchableOpacity>
         <Text style={[styles.linkText, isDarkMode && styles.darkText]}>About</Text>
       </TouchableOpacity>
+
+      {/* Sign Out Button */}
+      <View style={styles.signOutContainer}>
+        <TouchableOpacity style={styles.signOutButton} onPress={signOut}>
+          <Text style={styles.signOutButtonText}>Sign Out</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -307,8 +300,21 @@ const styles = StyleSheet.create({
   darkText: { 
     color: "#FFFFFF" 
   },
-  loadingContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
+  signOutContainer: {
+    alignItems: "center",
+    marginTop: 30,
+    marginBottom: 20,
+  },
+  signOutButton: {
+    backgroundColor: "#FF3B30",
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  signOutButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });

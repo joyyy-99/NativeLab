@@ -101,13 +101,6 @@ export default function Home() {
             <Text style={styles.goalTitle}>WEEKLY GOAL</Text>
           </View>
         </View>
-
-        {/* SIGN OUT BUTTON */}
-        <View style={styles.signOutContainer}>
-          <TouchableOpacity style={styles.signOutButton} onPress={signOut}>
-            <Text style={styles.signOutButtonText}>Sign Out</Text>
-          </TouchableOpacity>
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -222,10 +215,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     borderRadius: 10,
     alignItems: "center",
-  },
-  signOutButtonText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "600",
   },
 }); 
