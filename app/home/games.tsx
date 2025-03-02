@@ -16,7 +16,7 @@ import { router } from "expo-router";
 
 const { width } = Dimensions.get("window");
 
-export default function Home() {
+export default function Games() {
   const { user } = useAuth();
   const [userProfile, setUserProfile] = useState<{ 
     username: string; 
@@ -53,7 +53,7 @@ export default function Home() {
             <Text style={styles.greeting}>Hello {userProfile?.username || "User"}</Text>
             <Text style={styles.subText}>Let's have fun!</Text>
 
-            {/* Streak Count (Moved Below) */}
+            {/* Streak Count */}
             <View style={styles.streakWrapper}>
               <Text style={styles.fireEmoji}>🔥</Text>
               <Text style={styles.streakCount}>{userProfile?.streakCount ?? 0}</Text>
@@ -70,53 +70,49 @@ export default function Home() {
 
         {/* NAVIGATION BUTTONS */}
         <View style={styles.navButtons}>
-          <TouchableOpacity style={styles.activeButton}>
-            <Text style={styles.activeButtonText}>Learn</Text>
+          <TouchableOpacity 
+            style={styles.inactiveButton}
+            onPress={() => router.push("/home")}
+          >
+            <Text style={styles.inactiveButtonText}>Learn</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.inactiveButton}
-          onPress={() => router.push("/home/quiz")}
+          <TouchableOpacity 
+            style={styles.inactiveButton}
+            onPress={() => router.push("/home/quiz")}
           >
             <Text style={styles.inactiveButtonText}>Quiz</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.inactiveButton}
-          onPress={() => router.push("/home/games")}
-          >
-            <Text style={styles.inactiveButtonText}>Games</Text>
+          <TouchableOpacity style={styles.activeButton}>
+            <Text style={styles.activeButtonText}>Games</Text>
           </TouchableOpacity>
         </View>
 
-        {/* LEARNING CATEGORIES */}
-        <View style={styles.categories}>
-          <TouchableOpacity style={styles.category}>
-            <Image source={require("../../assets/images/videos.png")} style={styles.originalImage} />
-            <Text style={styles.categoryText}>Videos</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.category}>
-            <Image source={require("../../assets/images/writing.png")} style={styles.originalImage} />
-            <Text style={styles.categoryText}>Writing</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.category}>
-            <Image source={require("../../assets/images/speaking.png")} style={styles.originalImage} />
-            <Text style={styles.categoryText}>Speaking</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.category}>
-            <Image source={require("../../assets/images/pronunciation.png")} style={styles.originalImage} />
-            <Text style={styles.categoryText}>Pronunciation</Text>
+        {/* ADD FRIENDS BUTTON (Moved to Right) */}
+        <View style={styles.addFriendsContainer}>
+          <TouchableOpacity style={styles.addFriendsButton}>
+            <Image source={require("../../assets/images/add-friend-icon.png")} style={styles.addFriendsIcon} />
+            <Text style={styles.addFriendsText}>Add Friends</Text>
           </TouchableOpacity>
         </View>
 
-        {/* GOALS SECTION */}
-        <View style={styles.goalContainer}>
-          <View style={styles.goalBox}>
-            <Text style={styles.goalTitle}>DAILY GOAL</Text>
-          </View>
-          <View style={styles.goalBox}>
-            <Text style={styles.goalTitle}>WEEKLY GOAL</Text>
-          </View>
+        {/* GAMES SECTION */}
+        <View style={styles.gamesContainer}>
+          <TouchableOpacity style={styles.gameItem}>
+            <Image source={require("../../assets/images/word-search.png")} style={styles.gameIcon} />
+            <Text style={styles.gameText}>Word Search</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.gameItem}>
+            <Image source={require("../../assets/images/crossword.png")} style={styles.gameIcon} />
+            <Text style={styles.gameText}>Cross Word</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.gameItem}>
+            <Image source={require("../../assets/images/scrabble.png")} style={styles.gameIcon} />
+            <Text style={styles.gameText}>Scrabble</Text>
+          </TouchableOpacity>
         </View>
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -153,12 +149,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#7E7C7C",
   },
-  /* 🔥 Updated Streak Styles */
   streakWrapper: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 5, // Space below "Let's have fun!"
+    marginTop: 5,
   },
   fireEmoji: {
     fontSize: 16,
@@ -167,7 +162,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
     marginLeft: 5,
-    color: "#FF7700", // Keeps the orange color
+    color: "#FF7700",
   },
   profileImage: {
     width: 40,
@@ -201,43 +196,45 @@ const styles = StyleSheet.create({
     color: "#7E7C7C",
     fontSize: 16,
   },
-  categories: {
-    alignItems: "center",
-    marginTop: 20,
+  
+  /* Updated Add Friends Section */
+  addFriendsContainer: {
+    alignItems: "flex-end", // Align to the right
+    marginRight: 20,
+    marginTop: 10,
   },
-  category: {
+  addFriendsButton: {
+    flexDirection: "row",
     alignItems: "center",
-    marginVertical: 10,
   },
-  originalImage: {
-    width: 80, 
+  addFriendsIcon: {
+    width: 30, // Increased size
+    height: 30,
+    marginRight: 5,
+  },
+  addFriendsText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#000",
+  },
+
+  gamesContainer: {
+    alignItems: "center",
+  },
+  gameItem: {
+    alignItems: "center",
+    marginVertical: 15,
+  },
+  gameIcon: {
+    width: 80,
     height: 80,
-    resizeMode: "contain", 
+    resizeMode: "contain",
   },
-  categoryText: {
+  gameText: {
     fontSize: 16,
     fontWeight: "600",
     marginTop: 5,
     color: "#000",
   },
-  goalContainer: {
-    flexDirection: "row",
-    justifyContent: "space-evenly",
-    marginVertical: 20,
-  },
-  goalBox: {
-    width: width * 0.4,
-    height: 50,
-    backgroundColor: "#F5F5F5",
-    borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  goalTitle: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#000",
-  },
 });
-
 
