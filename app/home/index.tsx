@@ -17,8 +17,12 @@ import { router } from "expo-router";
 const { width } = Dimensions.get("window");
 
 export default function Home() {
-  const { user, signOut } = useAuth();
-  const [userProfile, setUserProfile] = useState<{ username: string; photoURL?: string } | null>(null);
+  const { user } = useAuth();
+  const [userProfile, setUserProfile] = useState<{ 
+    username: string; 
+    photoURL?: string;
+    streakCount?: number;
+  } | null>(null);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -44,10 +48,18 @@ export default function Home() {
           <TouchableOpacity>
             <Image source={require("../../assets/images/kenya-flag.png")} style={styles.flagIcon} />
           </TouchableOpacity>
+          
           <View style={styles.userInfo}>
             <Text style={styles.greeting}>Hello {userProfile?.username || "User"}</Text>
             <Text style={styles.subText}>Let's have fun!</Text>
+
+            {/* Streak Count (Moved Below) */}
+            <View style={styles.streakWrapper}>
+              <Text style={styles.fireEmoji}>🔥</Text>
+              <Text style={styles.streakCount}>{userProfile?.streakCount ?? 0}</Text>
+            </View>
           </View>
+
           <TouchableOpacity onPress={() => router.push("/profile")}>
             <Image
               source={userProfile?.photoURL ? { uri: userProfile.photoURL } : require("../../assets/images/profile-placeholder.png")}
@@ -131,10 +143,27 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#000",
+    marginBottom: 4,
   },
   subText: {
     fontSize: 14,
     color: "#7E7C7C",
+  },
+  /* 🔥 Updated Streak Styles */
+  streakWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 5, // Space below "Let's have fun!"
+  },
+  fireEmoji: {
+    fontSize: 16,
+  },
+  streakCount: {
+    fontSize: 14,
+    fontWeight: "bold",
+    marginLeft: 5,
+    color: "#FF7700", // Keeps the orange color
   },
   profileImage: {
     width: 40,
@@ -205,15 +234,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#000",
   },
-  signOutContainer: {
-    alignItems: "center",
-    marginBottom: 30,
-  },
-  signOutButton: {
-    backgroundColor: "#FF3B30",
-    paddingVertical: 12,
-    paddingHorizontal: 40,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-}); 
+});
+
+
