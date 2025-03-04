@@ -16,13 +16,15 @@ import { router } from "expo-router";
 
 const { width } = Dimensions.get("window");
 
-export default function Home() {
+export default function Quiz() {
   const { user } = useAuth();
   const [userProfile, setUserProfile] = useState<{ 
     username: string; 
     photoURL?: string;
     streakCount?: number;
   } | null>(null);
+  const [score, setScore] = useState(10); // Mock Score for now
+  const [energy, setEnergy] = useState(4); // Mock Energy for now
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -53,7 +55,7 @@ export default function Home() {
             <Text style={styles.greeting}>Hello {userProfile?.username || "User"}</Text>
             <Text style={styles.subText}>Let's have fun!</Text>
 
-            {/* Streak Count (Moved Below) */}
+            {/* Streak Count */}
             <View style={styles.streakWrapper}>
               <Text style={styles.fireEmoji}>🔥</Text>
               <Text style={styles.streakCount}>{userProfile?.streakCount ?? 0}</Text>
@@ -70,52 +72,55 @@ export default function Home() {
 
         {/* NAVIGATION BUTTONS */}
         <View style={styles.navButtons}>
-          <TouchableOpacity style={styles.activeButton}>
-            <Text style={styles.activeButtonText}>Learn</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.inactiveButton}
-          onPress={() => router.push("/home/quiz")}
+          <TouchableOpacity 
+            style={styles.inactiveButton}
+            onPress={() => router.push("/home")}
           >
-            <Text style={styles.inactiveButtonText}>Quiz</Text>
+            <Text style={styles.inactiveButtonText}>Learn</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.inactiveButton}
-          onPress={() => router.push("/home/games")}
+          <TouchableOpacity style={styles.activeButton}>
+            <Text style={styles.activeButtonText}>Quiz</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.inactiveButton}
+            onPress={() => router.push("/home/games")}
           >
             <Text style={styles.inactiveButtonText}>Games</Text>
           </TouchableOpacity>
         </View>
 
-        {/* LEARNING CATEGORIES */}
-        <View style={styles.categories}>
-          <TouchableOpacity style={styles.category}>
-            <Image source={require("../../assets/images/videos.png")} style={styles.originalImage} />
-            <Text style={styles.categoryText}>Videos</Text>
-          </TouchableOpacity>
+        {/* ENERGY (Lightning Bolt) */}
+        <View style={styles.energyContainer}>
+          <Text style={styles.energyEmoji}>⚡</Text>
+          <Text style={styles.energyCount}>{energy}</Text>
+        </View>
 
-          <TouchableOpacity style={styles.category}>
-            <Image source={require("../../assets/images/writing.png")} style={styles.originalImage} />
-            <Text style={styles.categoryText}>Writing</Text>
-          </TouchableOpacity>
+        {/* QUIZ QUESTION */}
+        <Text style={styles.quizText}>Select the correct answer from the choices below</Text>
 
-          <TouchableOpacity style={styles.category}>
-            <Image source={require("../../assets/images/speaking.png")} style={styles.originalImage} />
-            <Text style={styles.categoryText}>Speaking</Text>
-          </TouchableOpacity>
+        {/* QUESTION IMAGE */}
+        <View style={styles.quizImageContainer}>
+          <Image source={require("../../assets/images/rabbit.png")} style={styles.quizImage} />
+        </View>
+        <Text style={styles.quizWord}>Rabbit</Text>
 
-          <TouchableOpacity style={styles.category}>
-            <Image source={require("../../assets/images/pronunciation.png")} style={styles.originalImage} />
-            <Text style={styles.categoryText}>Pronunciation</Text>
+        {/* ANSWER CHOICES */}
+        <View style={styles.answersContainer}>
+          <TouchableOpacity style={styles.answerButton}>
+            <Text style={styles.answerText}>Sungura</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.answerButton}>
+            <Text style={styles.answerText}>Ngombe</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.answerButton}>
+            <Text style={styles.answerText}>Paka</Text>
           </TouchableOpacity>
         </View>
 
-        {/* GOALS SECTION */}
-        <View style={styles.goalContainer}>
-          <View style={styles.goalBox}>
-            <Text style={styles.goalTitle}>DAILY GOAL</Text>
-          </View>
-          <View style={styles.goalBox}>
-            <Text style={styles.goalTitle}>WEEKLY GOAL</Text>
-          </View>
+        {/* SCORE */}
+        <View style={styles.scoreContainer}>
+          <Text style={styles.scoreText}>Score</Text>
+          <Text style={styles.scoreValue}>{score}</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -153,12 +158,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#7E7C7C",
   },
-  /* 🔥 Updated Streak Styles */
   streakWrapper: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 5, // Space below "Let's have fun!"
+    marginTop: 5,
   },
   fireEmoji: {
     fontSize: 16,
@@ -167,7 +171,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
     marginLeft: 5,
-    color: "#FF7700", // Keeps the orange color
+    color: "#FF7700",
   },
   profileImage: {
     width: 40,
@@ -201,43 +205,70 @@ const styles = StyleSheet.create({
     color: "#7E7C7C",
     fontSize: 16,
   },
-  categories: {
+  energyContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
     alignItems: "center",
-    marginTop: 20,
+    marginTop: 10,
   },
-  category: {
+  energyEmoji: {
+    fontSize: 24,
+    marginRight: 5,
+  },
+  energyCount: {
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  quizText: {
+    textAlign: "center",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginVertical: 15,
+  },
+  quizImageContainer: {
     alignItems: "center",
     marginVertical: 10,
   },
-  originalImage: {
-    width: 80, 
-    height: 80,
-    resizeMode: "contain", 
+  quizImage: {
+    width: width * 0.6,
+    height: width * 0.6,
+    resizeMode: "contain",
   },
-  categoryText: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginTop: 5,
-    color: "#000",
+  quizWord: {
+    textAlign: "center",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginVertical: 10,
   },
-  goalContainer: {
+  answersContainer: {
     flexDirection: "row",
-    justifyContent: "space-evenly",
-    marginVertical: 20,
+    justifyContent: "center",
+    marginTop: 20,
   },
-  goalBox: {
-    width: width * 0.4,
-    height: 50,
-    backgroundColor: "#F5F5F5",
+  answerButton: {
+    backgroundColor: "#F9DB82",
+    padding: 10,
+    marginHorizontal: 5,
     borderRadius: 10,
+  },
+  answerText: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  scoreContainer: {
+    flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
+    marginVertical: 20,
   },
-  goalTitle: {
-    fontSize: 14,
+  scoreText: {
+    fontSize: 18,
     fontWeight: "bold",
-    color: "#000",
+    marginRight: 5,
+  },
+  scoreValue: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#FF7700",
   },
 });
-
-
